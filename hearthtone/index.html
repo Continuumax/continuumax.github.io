@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HearthTone — 純粹的音樂體驗 | Continuumax Team</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23000'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='17' fill='%23fff' text-anchor='middle' font-weight='bold'%3EH%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    --bg: #000000;
+    --bg-elevated: #0A0A0A;
+    --fg: #FFFFFF;
+    --fg-muted: #888888;
+    --line: #222222;
+    --line-light: #333333;
+    --pad: clamp(24px, 5vw, 80px);
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-radius: 0 !important;
+  }
+
+  html { scroll-behavior: smooth; -webkit-text-size-adjust:100%; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  ::selection { background: var(--fg); color: var(--bg); }
+
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 0 var(--pad); width: 100%; }
+
+  /* ================= 极简导航 & 汉堡菜单 ================= */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 72px;
+    display: flex; align-items: center;
+    border-bottom: 1px solid transparent;
+    z-index: 100;
+    transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
+  }
+  .nav.scrolled {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    border-bottom-color: var(--line);
+  }
+  .nav-inner {
+    display: flex; justify-content: space-between; align-items: center; width: 100%;
+  }
+  .nav-left { display: flex; align-items: center; gap: 20px; }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .logo { font-size: 18px; font-weight: 700; letter-spacing: 0.1em; }
+  .company-tag {
+    font-size: 10px; color: var(--fg-muted);
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  .lang-select {
+    appearance: none; -webkit-appearance: none;
+    background: transparent; color: var(--fg);
+    font-family: var(--font-sans); font-size: 12px; letter-spacing: 0.05em;
+    border: 1px solid var(--line-light);
+    padding: 7px 30px 7px 12px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  .lang-select option { background: #121212; color: var(--fg); }
+  .lang-select:hover { border-color: var(--fg); }
+
+  .menu-btn {
+    display: flex; flex-direction: column; justify-content: space-between;
+    width: 24px; height: 14px; cursor: pointer; z-index: 101;
+  }
+  .menu-btn span { display: block; width: 100%; height: 1.5px; background-color: var(--fg); transition: all 0.3s ease; }
+  .menu-btn:hover span { background-color: var(--fg-muted); }
+
+  .overlay-menu {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    z-index: 99;
+    display: flex; justify-content: center; align-items: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .overlay-menu.open { opacity: 1; pointer-events: auto; }
+  .overlay-links { display: flex; flex-direction: column; gap: 32px; text-align: center; }
+  .overlay-links a { font-size: clamp(32px, 5vw, 48px); font-weight: 500; color: var(--fg-muted); transition: color 0.2s; }
+  .overlay-links a:hover { color: var(--fg); }
+  .menu-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .menu-btn.open span:nth-child(2) { opacity: 0; }
+  .menu-btn.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  /* ================= 首屏 ================= */
+  .hero {
+    padding-top: clamp(160px, 22vh, 240px);
+    padding-bottom: clamp(80px, 10vw, 140px);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero h1 {
+    font-size: clamp(56px, 9vw, 140px);
+    font-weight: 500; line-height: 0.95; letter-spacing: -0.04em; margin-bottom: 40px;
+  }
+  .hero-bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; flex-wrap: wrap; }
+  .hero-desc { max-width: 480px; font-size: clamp(16px, 1.5vw, 20px); color: var(--fg-muted); line-height: 1.6; }
+  .hero-desc strong { color: var(--fg); font-weight: 500; }
+  .hero-actions { display: flex; gap: 16px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 16px 32px; font-size: 14px; font-weight: 500; letter-spacing: 0.05em;
+    transition: all 0.25s;
+  }
+  .btn-primary { background: var(--fg); color: var(--bg); border: 1px solid var(--fg); }
+  .btn-primary:hover { background: var(--fg-muted); border-color: var(--fg-muted); }
+  .btn-outline { background: transparent; color: var(--fg); border: 1px solid var(--line-light); }
+  .btn-outline:hover { border-color: var(--fg); }
+
+  /* ================= 下载确认弹窗 ================= */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex; justify-content: center; align-items: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: 100%; max-width: 460px;
+    background: #121212; border: 1px solid var(--line-light);
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+    padding: clamp(32px, 5vw, 48px);
+  }
+  .modal h3 { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 14px; }
+  .modal p { font-size: 15px; line-height: 1.6; color: var(--fg-muted); margin-bottom: 32px; }
+  .modal p strong { color: var(--fg); font-weight: 500; }
+  .modal-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+
+  /* ================= 播放器展示区 ================= */
+  .showcase {
+    padding: clamp(80px, 12vw, 160px) 0;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--line);
+  }
+  .showcase-header {
+    margin-bottom: clamp(40px, 6vw, 80px);
+    display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;
+  }
+  .showcase-header h2 { font-size: clamp(32px, 4vw, 56px); font-weight: 500; letter-spacing: -0.02em; }
+  .showcase-header p { font-size: 15px; color: var(--fg-muted); }
+
+  .player-ui {
+    width: 100%; max-width: 1100px; margin: 0 auto;
+    background: #121212; border: 1px solid var(--line-light);
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+    display: flex; flex-direction: column;
+  }
+  .p-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 32px; border-bottom: 1px solid var(--line);
+    font-size: 12px; color: var(--fg-muted); letter-spacing: 0.05em;
+  }
+  .p-bar-left { display: flex; align-items: center; gap: 12px; }
+  .p-main { display: grid; grid-template-columns: clamp(280px, 32vw, 400px) 1fr; align-items: stretch; }
+  .p-cover-area { padding: 40px; display: flex; justify-content: center; align-items: center; border-right: 1px solid var(--line); }
+  .p-cover {
+    width: 100%; aspect-ratio: 1/1;
+    background: linear-gradient(135deg, #2a2a2a 0%, #111 100%);
+    display: flex; justify-content: center; align-items: center;
+    border: 1px solid var(--line); position: relative;
+  }
+  .p-cover::after { content: "H"; font-size: 80px; font-weight: 300; color: rgba(255,255,255,0.1); }
+  .p-info { padding: clamp(32px, 4vw, 56px); display: flex; flex-direction: column; justify-content: space-between; }
+  .p-meta h3 { font-size: clamp(28px, 3.5vw, 42px); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .p-meta p { font-size: 15px; color: var(--fg-muted); }
+  .p-progress-box { margin-top: 40px; }
+  .p-track { height: 4px; background: var(--line-light); position: relative; cursor: pointer; }
+  .p-fill { position: absolute; top: 0; left: 0; bottom: 0; width: 35%; background: #fff; transition: width 0.1s linear; }
+  .p-time { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+  .p-controls { display: flex; align-items: center; gap: 24px; margin-top: 32px; }
+  .p-btn { color: var(--fg-muted); transition: color 0.2s; }
+  .p-btn:hover { color: #fff; }
+  .p-btn svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+  .p-play-btn {
+    width: 56px; height: 56px; background: #fff; color: #000;
+    display: flex; justify-content: center; align-items: center;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .p-play-btn:hover { transform: scale(1.05); background: #eee; }
+  .p-play-btn svg { width: 20px; height: 20px; fill: #000; margin-left: 3px; display: block; }
+  .p-play-btn.playing svg { margin-left: 0; }
+  .p-quality {
+    margin-left: auto; font-size: 11px; letter-spacing: 0.1em; color: var(--fg-muted);
+    border: 1px solid var(--line-light); padding: 6px 12px;
+  }
+
+  /* ================= 特性网格 ================= */
+  .features { padding: clamp(80px, 12vw, 160px) 0; }
+  .feat-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid var(--line); border-left: 1px solid var(--line);
+  }
+  .feat-cell {
+    padding: clamp(32px, 5vw, 64px);
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    transition: background 0.3s;
+  }
+  .feat-cell:hover { background: var(--bg-elevated); }
+  .feat-cell h4 { font-size: 20px; font-weight: 500; margin-bottom: 16px; }
+  .feat-cell p { font-size: 15px; line-height: 1.6; color: var(--fg-muted); max-width: 400px; }
+
+  /* ================= 底部 CTA ================= */
+  .cta { padding: clamp(100px, 15vw, 200px) 0; text-align: center; border-top: 1px solid var(--line); }
+  .cta h2 { font-size: clamp(40px, 6vw, 84px); font-weight: 500; letter-spacing: -0.03em; margin-bottom: 48px; }
+
+  /* ================= 页脚 ================= */
+  .footer {
+    padding: 40px 0; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between;
+    font-size: 12px; color: var(--fg-muted); letter-spacing: 0.05em;
+  }
+  .footer-links { display: flex; gap: 24px; }
+  .footer a:hover { color: var(--fg); }
+
+  /* ================= Cookie 合规弹窗 ================= */
+  .cookie-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+    z-index: 300;
+    display: flex; justify-content: center; align-items: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .cookie-overlay.open { opacity: 1; pointer-events: auto; }
+  .cookie-panel {
+    width: 100%; max-width: 640px;
+    background: #121212; border: 1px solid var(--line-light);
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+    padding: clamp(28px, 4vw, 44px);
+  }
+  .cookie-panel h3 { font-size: 22px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 14px; }
+  .cookie-desc { font-size: 15px; line-height: 1.6; color: var(--fg-muted); margin-bottom: 16px; }
+  .cookie-desc strong { color: var(--fg); font-weight: 500; }
+  .cookie-view { border: 1px solid var(--line-light); padding: 14px 16px; }
+  .cookie-view .cv-title { font-size: 11px; letter-spacing: 0.12em; color: var(--fg-muted); margin-bottom: 8px; text-transform: uppercase; }
+  .cookie-row { display: flex; gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .cookie-row:last-child { border-bottom: none; }
+  .cookie-row .ck { width: 200px; flex-shrink: 0; color: var(--fg); }
+  .cookie-row .cv { color: var(--fg-muted); word-break: break-all; }
+  .cookie-note { font-size: 13px; color: var(--fg-muted); line-height: 1.6; margin-top: 12px; }
+  .cookie-actions { display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; margin-top: 28px; }
+
+  /* 动画 */
+  .fade-up { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .fade-up.in { opacity: 1; transform: translateY(0); }
+
+  /* 响应式 */
+  @media (max-width: 900px) {
+    .p-main { grid-template-columns: 1fr; }
+    .p-cover-area { border-right: none; border-bottom: 1px solid var(--line); }
+    .p-cover { max-width: 300px; }
+  }
+  @media (max-width: 768px) {
+    .feat-grid { grid-template-columns: 1fr; }
+    .hero-bottom { flex-direction: column; align-items: flex-start; }
+    .hero-actions { width: 100%; flex-direction: column; }
+    .btn { width: 100%; }
+    .footer { flex-direction: column; gap: 16px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <div class="nav-left">
+        <div class="brand">
+          <a href="#" class="logo">HEARTHTONE</a>
+          <span class="company-tag">BY CONTINUUMAX TEAM</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <select class="lang-select" id="langSelect" aria-label="Language">
+          <option value="zh-Hant">繁體中文</option>
+          <option value="zh-CN">简体中文</option>
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+        </select>
+        <div class="menu-btn" id="menuBtn">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 全屏下拉菜单 -->
+  <div class="overlay-menu" id="overlayMenu">
+    <div class="overlay-links">
+      <a href="#player" data-i18n="menu.player">播放器</a>
+      <a href="#features" data-i18n="menu.features">特性</a>
+      <a href="#download" data-i18n="menu.download">下載</a>
+    </div>
+  </div>
+
+  <main>
+    <!-- 首屏 -->
+    <section class="hero">
+      <div class="wrap">
+        <h1 class="fade-up" data-i18n="hero.title">純粹的音樂體驗。</h1>
+        <div class="hero-bottom">
+          <p class="hero-desc fade-up" data-i18n="hero.desc">
+            由 <strong>Continuumax Team</strong> 打造。深度定製的本地與雲端曲庫播放器。剔除一切冗餘廣告與干擾，只為音樂留出空間。
+          </p>
+          <div class="hero-actions fade-up">
+            <a href="https://pan.baidu.com/s/11yW18-ZCoYgD-UkHDgpeGw?pwd=CONC" target="_blank" rel="noopener" class="btn btn-primary js-download" data-i18n="hero.btn1">下載 Windows 版</a>
+            <a href="#player" class="btn btn-outline" data-i18n="hero.btn2">了解詳情</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 播放器展示 -->
+    <section class="showcase" id="player">
+      <div class="wrap">
+        <div class="showcase-header fade-up">
+          <h2 data-i18n="showcase.h2">回歸純粹的播放器。</h2>
+          <p data-i18n="showcase.p">支援 Hi-Res 音質與極速雲端同步</p>
+        </div>
+
+        <div class="player-ui fade-up">
+          <div class="p-bar">
+            <div class="p-bar-left">
+              <span data-i18n="pbar.now">正在播放 / Now Playing</span>
+            </div>
+            <span>Hi-Res Lossless</span>
+          </div>
+
+          <div class="p-main">
+            <div class="p-cover-area">
+              <div class="p-cover"></div>
+            </div>
+
+            <div class="p-info">
+              <div class="p-meta">
+                <h3>Nocturne in Static</h3>
+                <p>Aya Kōda · 2025</p>
+              </div>
+              <div class="p-progress-box">
+                <div class="p-track" id="track">
+                  <div class="p-fill" id="fill"></div>
+                </div>
+                <div class="p-time">
+                  <span id="cur">01:24</span>
+                  <span>04:02</span>
+                </div>
+              </div>
+              <div class="p-controls">
+                <button class="p-btn" aria-label="上一首">
+                  <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                </button>
+                <button class="p-play-btn" id="playBtn" aria-label="播放">
+                  <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <button class="p-btn" aria-label="下一首">
+                  <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                </button>
+                <span class="p-quality">FLAC · 24/96</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 特性网格 -->
+    <section class="features" id="features">
+      <div class="wrap">
+        <div class="feat-grid">
+          <div class="feat-cell fade-up">
+            <h4 data-i18n="feat.1.h">跨平台雲端同步</h4>
+            <p data-i18n="feat.1.p">一鍵接入主流音樂平台帳號，極速同步你的紅心歌單與雲端收藏，無論在哪裡聽，曲庫始終如影隨形。</p>
+          </div>
+          <div class="feat-cell fade-up">
+            <h4 data-i18n="feat.2.h">絕對專注模式</h4>
+            <p data-i18n="feat.2.p">沒有廣告、沒有直播、沒有雜亂的社交功能。打開軟體，只有你的歌單安靜地等待播放。</p>
+          </div>
+          <div class="feat-cell fade-up">
+            <h4 data-i18n="feat.3.h">Windows 原生響應</h4>
+            <p data-i18n="feat.3.p">專為 Windows 10 / 11 深度優化，毫秒級切歌體驗。即使擁有上萬首曲目，本搜尋依然絲滑無阻。</p>
+          </div>
+          <div class="feat-cell fade-up">
+            <h4 data-i18n="feat.4.h">硬朗直角設計</h4>
+            <p data-i18n="feat.4.p">摒棄圓滑的卡片堆疊，播放器本體採用高對比度材質與硬朗的幾何線條，讓介面成為一種工業藝術品。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 下载 -->
+    <section class="cta" id="download">
+      <div class="wrap">
+        <h2 class="fade-up" data-i18n="cta.title">準備好更好的聽歌體驗了嗎？</h2>
+        <div class="hero-actions fade-up" style="justify-content:center;">
+          <a href="https://pan.baidu.com/s/11yW18-ZCoYgD-UkHDgpeGw?pwd=CONC" target="_blank" rel="noopener" class="btn btn-primary js-download" data-i18n="cta.btn">下載 Windows 10 / 11 版</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 下载确认弹窗 -->
+  <div class="modal-overlay" id="downloadModal">
+    <div class="modal">
+      <h3 data-i18n="dlm.title">即將跳轉至百度網盤</h3>
+      <p data-i18n="dlm.desc">點擊「前往下載」後將離開本頁面，前往 <strong>百度網盤</strong> 下載 HearthTone 安裝包。</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="cancelDownload" data-i18n="dlm.cancel">取消</button>
+        <button type="button" class="btn btn-primary" id="confirmDownload" data-i18n="dlm.confirm">前往下載</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cookie 合规弹窗 -->
+  <div class="cookie-overlay" id="cookieOverlay" role="dialog" aria-modal="true" aria-label="Cookie">
+    <div class="cookie-panel">
+      <h3 data-i18n="cookie.title">本網站使用 Cookie</h3>
+      <p class="cookie-desc" data-i18n="cookie.desc">我們使用 Cookie 在你的裝置上記錄偏好，以獲得更連貫的瀏覽體驗。本網站<strong>不設置任何第三方追蹤 Cookie</strong>，僅使用一個用於記住你選擇的偏好 Cookie。</p>
+      <div class="cookie-view">
+        <div class="cv-title" data-i18n="cookie.view">查看完整 Cookie 內容</div>
+        <div id="cookieRows"></div>
+      </div>
+      <p class="cookie-note" data-i18n="cookie.note">你可以隨時透過頁腳「Cookie 設定」重新開啟本面板，查看或修改你的選擇。</p>
+      <div class="cookie-actions">
+        <button type="button" class="btn btn-outline" id="cookieReject" data-i18n="cookie.reject">僅必要</button>
+        <button type="button" class="btn btn-primary" id="cookieAccept" data-i18n="cookie.accept">接受全部</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <div class="wrap" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+      <span data-i18n="footer.copyright">© 2025–2026 Continuumax Team. HearthTone is a product of Continuumax Team.</span>
+      <div class="footer-links">
+        <a href="privacy.html" data-i18n="footer.privacy">隱私政策</a>
+        <a href="terms.html" data-i18n="footer.terms">服務條款</a>
+        <a href="#" class="cookie-open" data-i18n="footer.cookie">Cookie</a>
+        <a href="mailto:support@continuumax.example" data-i18n="footer.contact">聯繫我們</a>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  // ====== 0. 国际化 i18n（默认繁体） ======
+  var I18N = {
+    "menu.player":      { "zh-Hant":"播放器", "zh-CN":"播放器", "en-US":"Player", "en-GB":"Player" },
+    "menu.features":    { "zh-Hant":"特性", "zh-CN":"特性", "en-US":"Features", "en-GB":"Features" },
+    "menu.download":    { "zh-Hant":"下載", "zh-CN":"下载", "en-US":"Download", "en-GB":"Download" },
+
+    "hero.title":       { "zh-Hant":"純粹的音樂體驗。", "zh-CN":"纯粹的音乐体验。", "en-US":"A pure music experience.", "en-GB":"A pure music experience." },
+    "hero.desc":        { "zh-Hant":"由 <strong>Continuumax Team</strong> 打造。深度定製的本地與雲端曲庫播放器。剔除一切冗餘與干擾，只為音樂留出空間。", "zh-CN":"由 <strong>Continuumax Team</strong> 打造。深度定制的本地与云端曲库播放器。剔除一切冗余与干扰，只为音乐留出空间。", "en-US":"Built by <strong>Continuumax Team</strong>. A deeply local and cloud-synced library player, stripped of every distraction to leave nothing but room for the music.", "en-GB":"Built by <strong>Continuumax Team</strong>. A deeply local and cloud-synced library player, stripped of every distraction to leave only room for the music." },
+    "hero.btn1":        { "zh-Hant":"下載 Windows 版", "zh-CN":"下载 Windows 版", "en-US":"Download for Windows", "en-GB":"Download for Windows" },
+    "hero.btn2":        { "zh-Hant":"了解詳情", "zh-CN":"了解详情", "en-US":"Learn more", "en-GB":"Learn more" },
+
+    "showcase.h2":      { "zh-Hant":"回歸純粹的播放器。", "zh-CN":"回归纯粹的播放器。", "en-US":"A player, back to the basics.", "en-GB":"A player, back to the basics." },
+    "showcase.p":       { "zh-Hant":"支持 Hi-Res 與極速雲端同步", "zh-CN":"支持 Hi-Res 与极速云同步", "en-US":"Hi-Res quality, instant cloud sync", "en-GB":"Hi-Res quality, instant cloud sync" },
+    "pbar.now":         { "zh-Hant":"正在播放 / Now Playing", "zh-CN":"正在播放 / Now Playing", "en-US":"Now Playing", "en-GB":"Now Playing" },
+
+    "feat.1.h":         { "zh-Hant":"跨平台雲端同步", "zh-CN":"跨平台云端同步", "en-US":"Cross-platform cloud sync", "en-GB":"Cross-platform cloud sync" },
+    "feat.1.p":         { "zh-Hant":"一鍵接入主流音樂平台帳號，極速同步你的紅心歌單與雲端收藏，無論在哪裡聽，曲庫始終如影隨形。", "zh-CN":"一键接入主流音乐平台账号，极速同步你的红心歌单与云端收藏，无论在哪里听，曲库始终如影随形。", "en-US":"Connect your streaming accounts in one tap and sync your favourites instantly. Wherever you listen, your library follows.", "en-GB":"Connect your streaming accounts in one tap and sync your favourites instantly. Wherever you listen, your library follows." },
+    "feat.2.h":         { "zh-Hant":"絕對專注模式", "zh-CN":"绝对专注模式", "en-US":"Pure focus mode", "en-GB":"Pure focus mode" },
+    "feat.2.p":         { "zh-Hant":"沒有廣告、沒有直播、沒有雜亂的社交功能。打開軟體，只有你的歌單安靜地等待播放。", "zh-CN":"没有广告、没有直播、没有杂乱的社交功能。打开软件，只有你的歌单安静地等待播放。", "en-US":"No ads, no streams, no social noise. Open it and all you get is your playlist, quietly waiting to play.", "en-GB":"No ads, no streams, no social noise. Open it and all you get is your playlist, quietly waiting to play." },
+    "feat.3.h":         { "zh-Hant":"Windows 原生響應", "zh-CN":"Windows 原生响应", "en-US":"Native Windows performance", "en-GB":"Native Windows performance" },
+    "feat.3.p":         { "zh-Hant":"專為 Windows 10 / 11 深度優化，毫秒級切歌體驗。即使擁有上萬首曲目，本地搜尋依然絲滑無阻。", "zh-CN":"专为 Windows 10 / 11 深度优化，毫秒级切歌体验。即使拥有上万首曲目，本地搜索依然丝滑无阻。", "en-US":"Deeply optimised for Windows 10 / 11, with instant track switching. Even with tens of thousands of tracks, local search stays silky smooth.", "en-GB":"Deeply optimised for Windows 10 / 11, with instant track switching. Even with tens of thousands of tracks, local search stays silky smooth." },
+    "feat.4.h":         { "zh-Hant":"硬朗直角設計", "zh-CN":"硬朗直角设计", "en-US":"Sharp, cornered design", "en-GB":"Sharp, cornered design" },
+    "feat.4.p":         { "zh-Hant":"摒棄圓滑的卡片堆疊，播放器本體採用高對比度材質與硬朗的幾何線條，讓介面成為一種工業藝術品。", "zh-CN":"摒弃圆滑的卡片堆叠，播放器本体采用高对比度材质与硬朗的几何线条，让界面成为一种工业艺术品。", "en-US":"No soft card stacks. A high-contrast body with hard geometric lines turns the interface into an industrial object.", "en-GB":"No soft card stacks. A high-contrast body with hard geometric lines turns the interface into an industrial object." },
+
+    "cta.title":        { "zh-Hant":"準備好更好的聽歌體驗了嗎？", "zh-CN":"准备好更好的听歌体验了吗？", "en-US":"Ready for a better way to listen?", "en-GB":"Ready for a better way to listen?" },
+    "cta.btn":          { "zh-Hant":"下載 Windows 10 / 11 版", "zh-CN":"下载 Windows 10 / 11 版", "en-US":"Download for Windows 10 / 11", "en-GB":"Download for Windows 10 / 11" },
+
+    "dlm.title":        { "zh-Hant":"即將跳轉至百度網盤", "zh-CN":"即将跳转至百度网盘", "en-US":"You'll be redirected to Baidu Netdisk", "en-GB":"You'll be redirected to Baidu Netdisk" },
+    "dlm.desc":         { "zh-Hant":"點擊「前往下載」後將離開本頁面，前往 <strong>百度網盤</strong> 下載 HearthTone 安裝包。", "zh-CN":"点击「前往下载」后将离开本页面，前往 <strong>百度网盘</strong> 下载 HearthTone 安装包。", "en-US":"Clicking will leave this page and open the <strong>Baidu Netdisk</strong> link to download the HearthTone installer.", "en-GB":"Clicking will leave this page and open the <strong>Baidu Netdisk</strong> link to download the HearthTone installer." },
+    "dlm.cancel":       { "zh-Hant":"取消", "zh-CN":"取消", "en-US":"Cancel", "en-GB":"Cancel" },
+    "dlm.confirm":      { "zh-Hant":"前往下載", "zh-CN":"前往下载", "en-US":"Go to download", "en-GB":"Go to download" },
+
+    "footer.copyright": { "zh-Hant":"© 2025–2026 Continuumax Team. HearthTone is a product of Continuumax Team.", "zh-CN":"© 2025–2026 Continuumax Team. HearthTone is a product of Continuumax Team.", "en-US":"© 2025–2026 Continuumax Team. HearthTone is a product of Continuumax Team.", "en-GB":"© 2025–2026 Continuumax Team. HearthTone is a product of Continuumax Team." },
+    "footer.privacy":   { "zh-Hant":"隱私政策", "zh-CN":"隐私政策", "en-US":"Privacy Policy", "en-GB":"Privacy Policy" },
+    "footer.terms":     { "zh-Hant":"服務條款", "zh-CN":"服务条款", "en-US":"Terms of Service", "en-GB":"Terms of Service" },
+    "footer.cookie":    { "zh-Hant":"Cookie 設定", "zh-CN":"Cookie 设置", "en-US":"Cookie Settings", "en-GB":"Cookie Settings" },
+    "footer.contact":   { "zh-Hant":"聯繫我們", "zh-CN":"联系我们", "en-US":"Contact us", "en-GB":"Contact us" },
+
+    "cookie.title":     { "zh-Hant":"本網站使用 Cookie", "zh-CN":"本网站使用 Cookie", "en-US":"We use cookies", "en-GB":"We use cookies" },
+    "cookie.desc":      { "zh-Hant":"我們使用 Cookie 記錄偏好，以獲得更連貫的體驗。本網站<strong>不設置任何第三方追蹤 Cookie</strong>。", "zh-CN":"我们使用 Cookie 记录偏好，以获得更连贯的体验。本网站<strong>不设置任何第三方追踪 Cookie</strong>。", "en-US":"We use a cookie to remember preferences. This site sets <strong>no third-party tracking cookies</strong>.", "en-GB":"We use a cookie to remember preferences. This site sets <strong>no third-party tracking cookies</strong>." },
+    "cookie.view":      { "zh-Hant":"查看完整 Cookie 內容", "zh-CN":"查看完整 Cookie 内容", "en-US":"View full cookie contents", "en-GB":"View full cookie contents" },
+    "cookie.note":      { "zh-Hant":"可隨時透過頁腳「Cookie 設定」重新開啟本面板。", "zh-CN":"可随时通过页脚「Cookie 设置」重新打开本面板。", "en-US":"Reopen anytime via Cookie Settings in the footer.", "en-GB":"Reopen anytime via Cookie Settings in the footer." },
+    "cookie.reject":    { "zh-Hant":"僅必要", "zh-CN":"仅必要", "en-US":"Essential only", "en-GB":"Essential only" },
+    "cookie.accept":    { "zh-Hant":"接受全部", "zh-CN":"接受全部", "en-US":"Accept all", "en-GB":"Accept all" },
+    "cookie.unset":     { "zh-Hant":"未設定", "zh-CN":"未设置", "en-US":"Not set", "en-GB":"Not set" }
+  };
+  var LANGS = ['zh-Hant','zh-CN','en-US','en-GB'];
+  var DEFAULT_LANG = 'zh-Hant';
+  var LANG_KEY = 'continuumax_lang';
+  var __lang = DEFAULT_LANG;
+
+  function t(key){
+    var map = I18N[key];
+    if (!map) return '';
+    return map[__lang] != null ? map[__lang] : (map[DEFAULT_LANG] || '');
+  }
+  function applyLang(lang){
+    if (LANGS.indexOf(lang) >= 0) __lang = lang; else __lang = DEFAULT_LANG;
+    document.documentElement.lang = __lang;
+    var sel = document.getElementById('langSelect');
+    if (sel) sel.value = __lang;
+    var els = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      var val = t(el.getAttribute('data-i18n'));
+      if (val !== '') el.innerHTML = val;
+    }
+  }
+
+  // ====== 1. 打开绝对在首屏 ======
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('load', () => {
+    if (window.location.hash) history.replaceState(null, null, window.location.pathname);
+    window.scrollTo(0, 0);
+  });
+
+  // ====== 2. 语言切换 ======
+  try { __lang = localStorage.getItem(LANG_KEY) || DEFAULT_LANG; } catch(e){}
+  applyLang(__lang);
+  document.getElementById('langSelect').addEventListener('change', function(){
+    __lang = this.value;
+    try { localStorage.setItem(LANG_KEY, __lang); } catch(e){}
+    applyLang(__lang);
+  });
+
+  // ====== 3. 导航滚动变色 ======
+  var nav = document.getElementById('nav');
+  window.addEventListener('scroll', function(){ nav.classList.toggle('scrolled', window.scrollY > 20); });
+
+  // ====== 4. 汉堡菜单交互 ======
+  var menuBtn = document.getElementById('menuBtn');
+  var overlayMenu = document.getElementById('overlayMenu');
+  var overlayLinks = document.querySelectorAll('.overlay-links a');
+  function toggleMenu(){
+    menuBtn.classList.toggle('open');
+    overlayMenu.classList.toggle('open');
+    document.body.style.overflow = overlayMenu.classList.contains('open') ? 'hidden' : '';
+  }
+  menuBtn.addEventListener('click', toggleMenu);
+  overlayLinks.forEach(function(link){ link.addEventListener('click', function(){ setTimeout(toggleMenu, 100); }); });
+
+  // ====== 5. 入场动画 ======
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(function(el){ io.observe(el); });
+
+  // ====== 6. 播放器交互 ======
+  var playBtn = document.getElementById('playBtn');
+  var playIcon = document.getElementById('playIcon');
+  var track = document.getElementById('track');
+  var fill = document.getElementById('fill');
+  var curText = document.getElementById('cur');
+  var isPlaying = false;
+  var progress = 84;
+  var duration = 242;
+  var iconPlay = '<path d="M8 5v14l11-7z"/>';
+  var iconPause = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+  playBtn.addEventListener('click', function(){
+    isPlaying = !isPlaying;
+    playIcon.innerHTML = isPlaying ? iconPause : iconPlay;
+    playBtn.classList.toggle('playing', isPlaying);
+  });
+  track.addEventListener('click', function(e){
+    var rect = track.getBoundingClientRect();
+    var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    progress = Math.floor(ratio * duration);
+    updateProgress();
+  });
+  function formatTime(secs){
+    var m = Math.floor(secs / 60), s = secs % 60;
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+  function updateProgress(){
+    fill.style.width = (progress / duration) * 100 + '%';
+    curText.innerText = formatTime(progress);
+  }
+  setInterval(function(){
+    if (isPlaying){ progress = (progress + 1) % duration; updateProgress(); }
+  }, 1000);
+  updateProgress();
+
+  // ====== 7. 下载确认弹窗 ======
+  var downloadLinks = document.querySelectorAll('.js-download');
+  var downloadModal = document.getElementById('downloadModal');
+  var confirmDownload = document.getElementById('confirmDownload');
+  var cancelDownload = document.getElementById('cancelDownload');
+  var pendingUrl = '';
+  downloadLinks.forEach(function(link){
+    link.addEventListener('click', function(e){
+      e.preventDefault();
+      pendingUrl = link.getAttribute('href');
+      downloadModal.classList.add('open');
+    });
+  });
+  function closeModal(){ downloadModal.classList.remove('open'); pendingUrl = ''; }
+  cancelDownload.addEventListener('click', closeModal);
+  downloadModal.addEventListener('click', function(e){ if (e.target === downloadModal) closeModal(); });
+  confirmDownload.addEventListener('click', function(){
+    if (pendingUrl) window.open(pendingUrl, '_blank', 'noopener');
+    closeModal();
+  });
+  window.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+
+  // ====== 8. Cookie 合规 ======
+  var COOKIE_KEY = 'continuumax_consent';
+  var LS_KEY = 'continuumax_consent_done';
+  var cookieOverlay = document.getElementById('cookieOverlay');
+  var cookieRows = document.getElementById('cookieRows');
+  var cookieAccept = document.getElementById('cookieAccept');
+  var cookieReject = document.getElementById('cookieReject');
+  function getCookie(name){
+    var m = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  function setConsentCookie(value){
+    document.cookie = COOKIE_KEY + '=' + encodeURIComponent(value) + '; max-age=' + (180 * 24 * 60 * 60) + '; path=/; SameSite=Lax';
+  }
+  function renderCookieRows(){
+    var cur = getCookie(COOKIE_KEY) || t('cookie.unset');
+    cookieRows.innerHTML = '<div class="cookie-row"><span class="ck">' + COOKIE_KEY + '</span><span class="cv">' + cur + '</span></div>';
+  }
+  function openCookie(force){
+    var done = localStorage.getItem(LS_KEY) === '1';
+    var hasCookie = !!getCookie(COOKIE_KEY);
+    if (!force && (done || hasCookie)) return;
+    renderCookieRows();
+    cookieOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeCookie(){ cookieOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+  function consent(value){ setConsentCookie(value); localStorage.setItem(LS_KEY, '1'); closeCookie(); }
+  cookieAccept.addEventListener('click', function(){ consent('accepted'); });
+  cookieReject.addEventListener('click', function(){ consent('necessary'); });
+  cookieOverlay.addEventListener('click', function(e){ if (e.target === cookieOverlay) closeCookie(); });
+  if (localStorage.getItem(LS_KEY) !== '1' && !getCookie(COOKIE_KEY)) openCookie(false);
+  document.querySelectorAll('.cookie-open').forEach(function(el){
+    el.addEventListener('click', function(e){ e.preventDefault(); openCookie(true); });
+  });
+</script>
+</body>
+</html>
