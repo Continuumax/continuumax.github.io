@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>我們的作品 — ContinuuMax</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231B1A17'/%3E%3Ctext x='16' y='22' font-family='Arial' font-size='17' fill='%23F4F1EC' text-anchor='middle' font-weight='bold'%3EC%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{ --bg:#F4F1EC; --bg-2:#FBF9F5; --card:#fff; --ink:#1B1A17; --muted:#6E6860; --line:#E4DED2; --line-2:#D8D1C3; --pad:clamp(24px,5vw,80px); --font:"Helvetica Neue",-apple-system,"Segoe UI",Roboto,Arial,"PingFang SC","Microsoft YaHei",sans-serif; }
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; border-radius:0!important; }
+  html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body{ background:var(--bg); color:var(--ink); font-family:var(--font); -webkit-font-smoothing:antialiased; line-height:1.7; overflow-x:hidden; }
+  a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; background:none; border:none; cursor:pointer; }
+  ::selection{ background:var(--ink); color:var(--bg); }
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 var(--pad); width:100%; }
+
+  .nav{ position:fixed; top:0; left:0; right:0; height:76px; display:flex; align-items:center; border-bottom:1px solid transparent; z-index:100; transition:background .3s,border-color .3s; }
+  .nav.scrolled{ background:rgba(251,249,245,.9); backdrop-filter:blur(18px); border-bottom-color:var(--line); }
+  .nav-inner{ display:flex; justify-content:space-between; align-items:center; width:100%; }
+  .nav-left{ display:flex; align-items:center; gap:34px; }
+  .nav-right{ display:flex; align-items:center; gap:20px; }
+  .brand{ display:flex; align-items:baseline; gap:12px; }
+  .logo{ font-size:16px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; }
+  .company-tag{ font-size:10px; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
+  .nav-links{ display:flex; gap:26px; }
+  .nav-links a{ font-size:13px; color:var(--muted); letter-spacing:.03em; }
+  .nav-links a:hover,.nav-links a.active{ color:var(--ink); }
+  .lang-select{ appearance:none; -webkit-appearance:none; background:transparent; color:var(--ink); font-family:var(--font); font-size:12px; letter-spacing:.05em; border:1px solid var(--line-2); padding:7px 30px 7px 12px; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236E6860'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+  .lang-select option{ background:#fff; color:var(--ink); }
+  .lang-select:hover{ border-color:var(--ink); }
+  .menu-btn{ display:none; flex-direction:column; justify-content:space-between; width:24px; height:14px; cursor:pointer; z-index:101; }
+  .menu-btn span{ display:block; width:100%; height:1.5px; background-color:var(--ink); transition:all .3s; }
+  .overlay-menu{ position:fixed; top:0; left:0; width:100%; height:100vh; background:rgba(244,241,236,.97); backdrop-filter:blur(10px); z-index:99; display:flex; justify-content:center; align-items:center; opacity:0; pointer-events:none; transition:opacity .4s; }
+  .overlay-menu.open{ opacity:1; pointer-events:auto; }
+  .overlay-links{ display:flex; flex-direction:column; gap:28px; text-align:center; }
+  .overlay-links a{ font-size:clamp(30px,5vw,42px); font-weight:300; color:var(--muted); }
+  .overlay-links a:hover{ color:var(--ink); }
+  .menu-btn.open span:nth-child(1){ transform:translateY(6.5px) rotate(45deg); }
+  .menu-btn.open span:nth-child(2){ opacity:0; }
+  .menu-btn.open span:nth-child(3){ transform:translateY(-6px) rotate(-45deg); }
+
+  .page{ padding:clamp(130px,18vh,200px) 0 clamp(80px,9vw,110px); }
+  .page-header{ padding-bottom:38px; border-bottom:1px solid var(--line); margin-bottom:48px; }
+  .page-header h1{ font-size:clamp(40px,6vw,72px); font-weight:300; letter-spacing:-.02em; line-height:1.05; margin-bottom:14px; }
+  .page-header p{ font-size:14px; color:var(--muted); letter-spacing:.04em; }
+  .lead{ font-size:17px; color:var(--muted); line-height:1.9; max-width:680px; margin-bottom:40px; }
+  .lead strong{ color:var(--ink); font-weight:500; }
+
+  .work{ margin-bottom:64px; }
+  .work-card{ background:var(--card); border:1px solid var(--line); }
+  .work-card .bar{ display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:1px solid var(--line); font-size:11px; color:var(--muted); letter-spacing:.14em; text-transform:uppercase; }
+  .work-card img{ width:100%; display:block; object-fit:cover; aspect-ratio:21/9; }
+  .work-card .body{ padding:32px 28px 36px; }
+  .work-card h3{ font-size:clamp(26px,3vw,38px); font-weight:300; margin-bottom:14px; }
+  .work-card p{ font-size:15.5px; color:var(--muted); line-height:1.9; max-width:720px; margin-bottom:20px; }
+  .work-card ul{ list-style:none; display:grid; grid-template-columns:repeat(2,1fr); gap:10px 22px; margin-bottom:26px; }
+  .work-card li{ font-size:15px; color:var(--ink); }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; padding:15px 30px; font-size:14px; letter-spacing:.05em; transition:all .25s; }
+  .btn-primary{ background:var(--ink); color:var(--bg); border:1px solid var(--ink); }
+  .btn-primary:hover{ background:#3a382f; }
+  .btn-outline{ background:transparent; color:var(--ink); border:1px solid var(--line-2); }
+  .btn-outline:hover{ border-color:var(--ink); }
+
+  .footer{ padding:46px 0 60px; border-top:1px solid var(--line); }
+  .footer-inner{ display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:28px; }
+  .footer-links{ display:flex; gap:24px; flex-wrap:wrap; }
+  .footer-links a{ font-size:13px; color:var(--muted); }
+  .footer-links a:hover{ color:var(--ink); }
+  .footer .copy{ font-size:12px; color:var(--muted); margin-top:24px; }
+  .footer .credits{ font-size:12px; color:var(--muted); margin-top:6px; }
+
+  .cookie-overlay{ position:fixed; top:0; left:0; width:100%; height:100vh; background:rgba(27,26,23,.4); backdrop-filter:blur(6px); z-index:300; display:flex; justify-content:center; align-items:center; padding:24px; opacity:0; pointer-events:none; transition:opacity .3s; }
+  .cookie-overlay.open{ opacity:1; pointer-events:auto; }
+  .cookie-panel{ width:100%; max-width:620px; background:var(--bg-2); border:1px solid var(--line-2); padding:clamp(28px,4vw,44px); }
+  .cookie-panel h3{ font-size:20px; font-weight:500; margin-bottom:12px; }
+  .cookie-desc{ font-size:15px; line-height:1.7; color:var(--muted); margin-bottom:16px; }
+  .cookie-view{ border:1px solid var(--line); padding:14px 16px; }
+  .cookie-view .cv-title{ font-size:11px; letter-spacing:.14em; color:var(--muted); margin-bottom:8px; text-transform:uppercase; }
+  .cookie-row{ display:flex; gap:14px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px; }
+  .cookie-row:last-child{ border-bottom:none; }
+  .cookie-row .ck{ width:200px; flex-shrink:0; color:var(--ink); }
+  .cookie-row .cv{ color:var(--muted); word-break:break-all; }
+  .cookie-actions{ display:flex; gap:12px; justify-content:flex-end; flex-wrap:wrap; margin-top:24px; }
+  .fade-up{ opacity:0; transform:translateY(20px); transition:opacity .8s ease,transform .8s ease; }
+  .fade-up.in{ opacity:1; transform:translateY(0); }
+  @media(max-width:960px){ .nav-links{ display:none; } .menu-btn{ display:flex; } }
+  @media(max-width:640px){ .footer-inner{ flex-direction:column; } .work-card ul{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <div class="nav-left">
+        <div class="brand"><a href="index.html" class="logo">ContinuuMax</a><span class="company-tag">Team</span></div>
+        <div class="nav-links">
+          <a href="index.html" data-i18n="nav.home">首頁</a>
+          <a href="beliefs.html" data-i18n="nav.beliefs">理念</a>
+          <a href="sustainability.html" data-i18n="nav.sustain">永續發展</a>
+          <a href="works.html" class="active" data-i18n="nav.works">作品</a>
+        </div>
+      </div>
+      <div class="nav-right">
+        <select class="lang-select" id="langSelect" aria-label="Language">
+          <option value="zh-Hant">繁體中文</option><option value="zh-CN">简体中文</option><option value="en-US">English (US)</option><option value="en-GB">English (UK)</option>
+        </select>
+        <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="overlay-menu" id="overlayMenu">
+    <div class="overlay-links">
+      <a href="index.html" data-i18n="nav.home">首頁</a>
+      <a href="beliefs.html" data-i18n="nav.beliefs">理念</a>
+      <a href="sustainability.html" data-i18n="nav.sustain">永續發展</a>
+      <a href="works.html" data-i18n="nav.works">作品</a>
+    </div>
+  </div>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="page-header">
+        <h1 data-i18n="head.title">我們的作品。</h1>
+        <p data-i18n="head.en">Our work</p>
+      </div>
+      <p class="lead" data-i18n="lead">
+        我們不貪多，只做真正值得存在的工具。這裡是目前已經出發的 <strong>HearthTone</strong>，與仍在打磨中的 <strong>uMax.ai</strong>。
+      </p>
+
+      <section class="work">
+        <div class="work-card fade-up">
+          <div class="bar"><span>HearthTone / Music</span><span data-i18n="ht.status">已發佈</span></div>
+          <img src="assets/img/bridge.jpg" alt="HearthTone" />
+          <div class="body">
+            <h3>HearthTone</h3>
+            <p data-i18n="ht.p">深度定制的本地與雲端曲庫播放器。HearthTone 剔除了一切廣告、直播與無關的社交功能，只保留一件它真正想做的事——把音樂播放得乾淨、純粹、毫不費力。</p>
+            <ul>
+              <li data-i18n="ht.f1">本地曲庫與雲端同步</li>
+              <li data-i18n="ht.f2">Hi-Res 高音質</li>
+              <li data-i18n="ht.f3">專注聆聽，零打擾</li>
+              <li data-i18n="ht.f4">Windows 原生優化</li>
+            </ul>
+            <a href="hearthtone/index.html" class="btn btn-primary" data-i18n="ht.btn">前往 HearthTone 官網</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="work">
+        <div class="work-card fade-up">
+          <div class="bar"><span>uMax.ai</span><span data-i18n="umax.status">尚未公開</span></div>
+          <div class="body">
+            <h3>uMax.ai</h3>
+            <p data-i18n="umax.p">我們的下一個項目，仍在打磨之中，尚未公開資訊。它的目標只有一個——把一個複雜的事情，做得簡單而克制。等它準備好，我們會在這裡正式介紹。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="work" style="margin-bottom:0;">
+        <div class="hero-actions fade-up" style="display:flex;gap:14px;flex-wrap:wrap;">
+          <a href="index.html" class="btn btn-outline" data-i18n="nav.home">回首頁</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="cookie-overlay" id="cookieOverlay" role="dialog" aria-modal="true" aria-label="Cookie">
+    <div class="cookie-panel">
+      <h3 data-i18n="cookie.title">本網站使用 Cookie</h3>
+      <p class="cookie-desc" data-i18n="cookie.desc">本網站<strong>不設置任何第三方追蹤 Cookie</strong>，僅使用一個偏好 Cookie。</p>
+      <div class="cookie-view">
+        <div class="cv-title" data-i18n="cookie.view">查看完整 Cookie 內容</div>
+        <div id="cookieRows"></div>
+      </div>
+      <div class="cookie-actions">
+        <button type="button" class="btn btn-outline" id="cookieReject" data-i18n="cookie.reject">僅必要</button>
+        <button type="button" class="btn btn-primary" id="cookieAccept" data-i18n="cookie.accept">接受全部</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-inner">
+        <div>
+          <p class="copy" data-i18n="footer.copyright">© 2025–2026 ContinuuMax Team.</p>
+          <p class="credits" data-i18n="footer.photo">照片：Unsplash 免費真實攝影。</p>
+        </div>
+        <div class="footer-links">
+          <a href="privacy.html" data-i18n="footer.privacy">隱私政策</a>
+          <a href="terms.html" data-i18n="footer.terms">服務條款</a>
+          <a href="#" class="cookie-open" data-i18n="footer.cookie">Cookie 設定</a>
+          <a href="mailto:support@continuumax.example" data-i18n="footer.contact">聯繫我們</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+<script>
+  var I18N = {
+    "nav.home":{ "zh-Hant":"首頁","zh-CN":"首页","en-US":"Home","en-GB":"Home" },
+    "nav.beliefs":{ "zh-Hant":"理念","zh-CN":"理念","en-US":"Beliefs","en-GB":"Beliefs" },
+    "nav.sustain":{ "zh-Hant":"永續發展","zh-CN":"可持续发展","en-US":"Sustainability","en-GB":"Sustainability" },
+    "nav.works":{ "zh-Hant":"作品","zh-CN":"作品","en-US":"Work","en-GB":"Work" },
+    "head.title":{ "zh-Hant":"我們的作品。","zh-CN":"我们的作品。","en-US":"Our work.","en-GB":"Our work." },
+    "head.en":{ "zh-Hant":"Our work","zh-CN":"Our work","en-US":"Our work","en-GB":"Our work" },
+    "lead":{ "zh-Hant":"我們不貪多，只做真正值得存在的工具。這裡是目前已發布的 <strong>HearthTone</strong>，以及仍在打磨的 <strong>uMax.ai</strong>。","zh-CN":"我们不贪多，只做真正值得存在的工具。这里是目前已发布的 <strong>HearthTone</strong>，以及仍在打磨的 <strong>uMax.ai</strong>。","en-US":"We don't overreach; we only build things worth existing. Here is HearthTone, already released, and uMax.ai, still being refined.","en-GB":"We don't overreach; we only what's worth existing. Here is HearthTone, already released, and uMax.ai, still being refined." },
+    "ht.p1":{ "zh-Hant":"HearthTone 是深度定製的本地與雲端音樂播放器。它剔除了所有冗餘、直播與無關的社交功能，只留下音樂本身——乾淨、自由、毫不費力。","zh-CN":"HearthTone 是深度定制的本地与云端音乐播放器。它剔除了所有冗余、直播与无关的社交功能，只留下音乐本身——干净、自由、毫不费力。","en-US":"HearthTone is a deeply local and cloud-synced music player. It strips away every distraction — no streams, no social noise — leaving nothing but the music, clean and effortless.","en-GB":"HearthTone is a deeply local and cloud-synced music player. It strips away every distraction — no streams, no social noise — leaving only the music, clean and effortless." },
+    "ht.f1":{ "zh-Hant":"本地曲庫與雲端同步","zh-CN":"本地曲库与云端同步","en-US":"Local library & cloud sync","en-GB":"Local library & cloud sync" },
+    "ht.f2":{ "zh-Hant":"Hi-Res 高音質","zh-CN":"Hi-Res 高音质","en-US":"Hi-Res sound","en-GB":"Hi-Res sound" },
+    "ht.f3":{ "zh-Hant":"專注聆聽，無打擾","zh-CN":"专注聆听，无打扰","en-US":"Pure focus, no interruptions","en-GB":"Pure focus, no interruptions" },
+    "ht.f4":{ "zh-Hant":"Windows 原生優化","zh-CN":"Windows 原生优化","en-US":"Optimised for Windows","en-GB":"Optimised for Windows" },
+    "ht.btn":{ "zh-Hant":"前往 HearthTone 官網","zh-CN":"前往 HearthTone 官网","en-US":"Visit HearthTone","en-GB":"Visit HearthTone" },
+    "umax.status":{ "zh-Hant":"尚未公開","zh-CN":"尚未公开","en-US":"Not yet public","en-GB":"Not yet public" },
+    "umax.p":{ "zh-Hant":"我們的下一個項目，仍在打磨之中，尚未公開資訊。它的目標只有一個——把一件複雜的事，做得簡單且克制。等它準備好，我們會在這裡正式介紹。","zh-CN":"我们的下一个项目，仍在打磨之中，尚未公开信息。它的目标只有一个——把一件复杂的事，做得简单且克制。等它准备好，我们会在这里正式介绍。","en-US":"Our next project, still being refined. Its only goal: take something complex and make it simple and restrained. We'll introduce it properly once it's ready.","en-GB":"Our next project, still being refined. Its only goal: take something complex and make it simple and restrained. We'll introduce it properly once it's ready." },
+    "footer.copyright":{ "zh-Hant":"© 2025–2026 ContinuuMax Team.","zh-CN":"© 2025–2026 ContinuuMax Team.","en-US":"© 2025–2026 ContinuuMax Team.","en-GB":"© 2025–2026 ContinuuMax Team." },
+    "footer.photo":{ "zh-Hant":"照片：Unsplash 免費真實攝影。","zh-CN":"照片：Unsplash 免费真实摄影。","en-US":"Photography: free real photos from Unsplash.","en-GB":"Photography: free real photos from Unsplash." },
+    "footer.privacy":{ "zh-Hant":"隱私政策","zh-CN":"隐私政策","en-US":"Privacy Policy","en-GB":"Privacy Policy" },
+    "footer.terms":{ "zh-Hant":"服務條款","zh-CN":"服务条款","en-US":"Terms of Service","en-GB":"Terms of Service" },
+    "footer.cookie":{ "zh-Hant":"Cookie 設定","zh-CN":"Cookie 设置","en-US":"Cookie Settings","en-GB":"Cookie Settings" },
+    "footer.contact":{ "zh-Hant":"聯繫我們","zh-CN":"联系我们","en-US":"Contact us","en-GB":"Contact us" },
+    "cookie.title":{ "zh-Hant":"本網站使用 Cookie","zh-CN":"本网站使用 Cookie","en-US":"We use cookies","en-GB":"We use cookies" },
+    "cookie.desc":{ "zh-Hant":"本網站<strong>不設置任何第三方追蹤 Cookie</strong>，僅使用一個偏好 Cookie。","zh-CN":"本网站<strong>不设置任何第三方追踪 Cookie</strong>，仅使用一个偏好 Cookie。","en-US":"This site sets <strong>no third-party tracking cookies</strong>, only one preference cookie.","en-GB":"This site sets <strong>no third-party tracking cookies</strong>, only one preference cookie." },
+    "cookie.view":{ "zh-Hant":"查看完整 Cookie 內容","zh-CN":"查看完整 Cookie 内容","en-US":"View full cookie contents","en-GB":"View full cookie contents" },
+    "cookie.reject":{ "zh-Hant":"僅必要","zh-CN":"仅必要","en-US":"Essential only","en-GB":"Essential only" },
+    "cookie.accept":{ "zh-Hant":"接受全部","zh-CN":"接受全部","en-US":"Accept all","en-GB":"Accept all" },
+    "cookie.unset":{ "zh-Hant":"未設定","zh-CN":"未设置","en-US":"Not set","en-GB":"Not set" }
+  };
+  var LANGS=['zh-Hant','zh-CN','en-US','en-GB']; var DEFAULT_LANG='zh-Hant'; var LANG_KEY='continuumax_lang'; var __lang=DEFAULT_LANG;
+  function t(k){ var m=I18N[k]; return m?(m[__lang]!=null?m[__lang]:m[DEFAULT_LANG]):''; }
+  function applyLang(l){ if(LANGS.indexOf(l)>=0)__lang=l; else __lang=DEFAULT_LANG; document.documentElement.lang=__lang; var s=document.getElementById('langSelect'); if(s)s.value=__lang; var els=document.querySelectorAll('[data-i18n]'); for(var i=0;i<els.length;i++){ var v=t(els[i].getAttribute('data-i18n')); if(v!=='')els[i].innerHTML=v; } }
+  try{ __lang=localStorage.getItem(LANG_KEY)||DEFAULT_LANG; }catch(e){}
+  applyLang(__lang);
+  document.getElementById('langSelect').addEventListener('change',function(){ __lang=this.value; try{localStorage.setItem(LANG_KEY,__lang);}catch(e){} applyLang(__lang); });
+  var nav=document.getElementById('nav'); window.addEventListener('scroll',function(){ nav.classList.toggle('scrolled',window.scrollY>20); });
+  var mb=document.getElementById('menuBtn'), om=document.getElementById('overlayMenu');
+  function tm(){ mb.classList.toggle('open'); om.classList.toggle('open'); document.body.style.overflow=om.classList.contains('open')?'hidden':''; }
+  mb.addEventListener('click',tm); document.querySelectorAll('.overlay-links a').forEach(function(a){ a.addEventListener('click',function(){ setTimeout(tm,100); }); });
+  var io=new IntersectionObserver(function(en){ en.forEach(function(x){ if(x.isIntersecting){ x.target.classList.add('in'); io.unobserve(x.target); } }); },{threshold:.1});
+  document.querySelectorAll('.fade-up').forEach(function(el){ io.observe(el); });
+  var CKEY='continuumax_consent',LS='continuumax_consent_done',co=document.getElementById('cookieOverlay'),cr=document.getElementById('cookieRows');
+  function gC(n){ var m=document.cookie.match(new RegExp('(?:^|;\\s*)'+n+'=([^;]*)')); return m?decodeURIComponent(m[1]):''; }
+  function sC(v){ document.cookie=CKEY+'='+encodeURIComponent(v)+'; max-age='+(180*24*60*60)+'; path=/; SameSite=Lax'; }
+  function rr(){ var s=gC(CKEY)||t('cookie.unset'); cr.innerHTML='<div class="cookie-row"><span class="ck">'+CKEY+'</span><span class="cv">'+s+'</span></div>'; }
+  function oc(f){ if(!f&&(localStorage.getItem(LS)==='1'||!!gC(CKEY)))return; rr(); co.classList.add('open'); document.body.style.overflow='hidden'; }
+  function cc(){ co.classList.remove('open'); document.body.style.overflow=''; }
+  function cn(v){ sC(v); localStorage.setItem(LS,'1'); cc(); }
+  document.getElementById('cookieAccept').addEventListener('click',function(){ cn('accepted'); });
+  document.getElementById('cookieReject').addEventListener('click',function(){ cn('necessary'); });
+  co.addEventListener('click',function(e){ if(e.target===co)cc(); });
+  if(localStorage.getItem(LS)!=='1'&&!gC(CKEY))oc(false);
+  document.querySelectorAll('.cookie-open').forEach(function(el){ el.addEventListener('click',function(e){ e.preventDefault(); oc(true); }); });
+</script>
+</body>
+</html>
